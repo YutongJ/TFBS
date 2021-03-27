@@ -35,6 +35,6 @@ Part 7: Measuring impact of SNV on TF binding strength (WT and alternative motif
 
 Part 9: Exploring potential association between TFs and complex diseases
 
-Part 10: Supplementary materials
+Part 10: Supplementary materials (Figures & Tables)
 
 
