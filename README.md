@@ -11,9 +11,9 @@ All the other dependent packages are listed at the beginning of each code file.
 
 ## Original Datasets:
 
-(1) "bed_file": all peak files used as positive sets for training gkmSVM 
+(1) "bed_file": all peak files used as positive sets for training gkmSVM. The details can be found in Supplementary Table S2.
 
-(2) "PWM": Source position frequency matrix for target TFs. Most files are from JASPAR, Factorbook and Xu, et al.(2015). All PFMs are transfered to position probability matrix ahead of analysis, thus there are 18 files ended with ".ppm" for use in this folder.
+(2) "PWM": Source position frequency matrix for target TFs. Most files are from JASPAR, Factorbook and Xu, et al.(2015). All PFMs are transfered to position probability matrix ahead of analysis, thus there are 18 files ended with ".ppm" for use in this folder. The details can be found in supplementary materials.
 
 (3) "SNPs_db153Common": All SNPs found on 23 human chromosomes (from UCSC Genome Browser)
 
