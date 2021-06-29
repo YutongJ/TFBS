@@ -14,6 +14,8 @@ name = c("BCL11A", "CTCF", "EGR1", "GABPA", "JUND", "JUN", "MAX","NANOG", "POU5F
 wd <- "/Users/jiangjiahui/Desktop/emory/Thesis/JJH part/"
 Disease <- c("AD", "Asthma", "Breast neoplasms", "Cardiovascular diseases", "Child Development Disorders Pervasive", "Colorectal Neoplasms", "Crohn diseases", "Lung neoplasms", "Obesity", "Psoriasis", "Type 2 diabetes")
 
+
+
 results_not_overlap <- function(Disease){
   
   
@@ -36,7 +38,7 @@ results_not_overlap <- function(Disease){
       
       # matching overlapped SNPs
       x3 <- SNP_10kb_mut2_23_new %over% motif.TF
-
+      
       if(length(which(x3)) == 0){
         not_overlapSNP <- SNP_10kb_mut2_23_new
       } else{
@@ -70,34 +72,8 @@ Disease <- c("AD", "Asthma", "Breast neoplasms", "Cardiovascular diseases", "Chi
 results_not_overlap(Disease)
 
 
-# calculate deltaSVM
-# 
-# for(i in 1:length(Disease)){
-#   Di <- Disease[i]
-#   for(j in 1:length(name)){
-#     TF <- name[j]
-#    
-#     
-#     result_not_overlap <- get(load(paste0(wd, Di, "/result_not_overlap_", TF, ".rda")))
-#     d <- get(load(paste0(wd, "motif/", TF, "/d.rda")))
-#     de <- as.matrix(d)
-#     
-#     gkmSVM.ref.not.overlap = mapply(seq10_deltasum,result_not_overlap$Seqref)
-#     gkmSVM.snp.not.overlap = mapply(seq10_deltasum,result_not_overlap$Seqmut)
-#     save(gkmSVM.ref.not.overlap, file = paste0(wd,Di, "/gkmSVM.ref.not.overlap_", TF, ".rda"))
-#     save(gkmSVM.snp.not.overlap, file = paste0(wd,Di, "/gkmSVM.snp.not.overlap_", TF, ".rda"))
-#     
-#     deltaSVM = gkmSVM.snp.not.overlap - gkmSVM.ref.not.overlap
-# 
-#     result_not_overlap <- cbind(result_not_overlap[,1:5], deltaSVM)
-#     result_not_overlap$sig_SNPs <- ifelse(deltaSVM < quan$left[j] | deltaSVM > quan$right[j], 1 , 0)
-#     save(result_not_overlap, file = paste0(wd, Di, "/result_not_overlap_", TF, ".rda"))
-#     write.table(result_not_overlap, paste0(wd, Di, "/result_not_overlap_", TF, ".txt"), append = F, row.names = F,col.names = F)
-#   }
-# }
 
-
-
+### aply threshold to select not-overlapped but significant SNP ###
 for(i in 1:length(Disease)){
   Di <- Disease[i]
   for(j in 1:length(name)){
@@ -113,6 +89,7 @@ for(i in 1:length(Disease)){
 }
 
 
+### calculate false positive and false negative ###
 for(i in 1:length(Disease)){
   Di <- Disease[i]
   SNP_10kb_mut2_23 <- get(load(paste0(wd, Di, "/SNP_10kb_mut2_23.rda")))
@@ -156,6 +133,28 @@ for(i in 1:length(Disease)){
 }
 
 
+
+##### plot heatmap V2 06/28 #######
+for(i in 1:length(Disease)){
+  Di <- Disease[i]
+  FP_FN <- read.table(paste0(wd, Di, "/FP_FN.txt"), header = F)
+  if(nrow(FP_FN) == 19){
+    FP_FN_result <- cbind(name, FP_FN)
+  } else if(nrow(FP_FN) == 18){
+    FP_FN_result <- cbind(name[-11], FP_FN)
+  }
+  colnames(FP_FN_result) <- c("motif", 
+                              "total_SNP", 
+                              "overlap_with_PWM_motif_sites", 
+                              "overlapped_and_significant_deltaSVM", 
+                              "False_postive",
+                              "not_overlap_with_PWM_motif_sites",
+                              "not_overlapped_but_sigificant_deltaSVM",
+                              "False_negative")
+  write.csv(FP_FN_result, file = paste0(wd, Di, "/FP_FN.csv"))
+  
+}
+
 require(openxlsx)
 tables = list()
 for(i in 1:length(Disease)){
@@ -165,19 +164,23 @@ for(i in 1:length(Disease)){
 }
 
 names(tables) <- Disease
-write.xlsx(tables, file = paste0(wd, "FP_FN.xlsx"), colWidths = rep("auto", length(Disease)))
 
 
 tables_FP <- data.frame(motif = tables[[1]][-11,]$motif, AD = tables[[1]][-11,]$False_postive, Asthma = tables[[2]][-11,]$False_postive, Breast_neoplasms = tables[[3]][-11,]$False_postive, Cardiovascular = tables[[4]]$False_postive,
-                       CDDP = tables[[5]]$False_postive, Colorectal = tables[[6]][-11,]$False_postive, Crohn = tables[[7]][-11,]$False_postive, Lung_neoplasms = tables[[8]]$False_postive, Obesity = tables[[9]]$False_postive,
-                       Psoriasis = tables[[10]][-11,]$False_postive, Type_2_diabetes = tables[[11]]$False_postive)
+                        CDDP = tables[[5]]$False_postive, Colorectal = tables[[6]][-11,]$False_postive, Crohn = tables[[7]][-11,]$False_postive, Lung_neoplasms = tables[[8]]$False_postive, Obesity = tables[[9]]$False_postive,
+                        Psoriasis = tables[[10]][-11,]$False_postive, Type_2_diabetes = tables[[11]]$False_postive)
 
 tables_FN <- data.frame(motif = tables[[1]][-11,]$motif, AD = tables[[1]][-11,]$False_negative, Asthma = tables[[2]][-11,]$False_negative, Breast_neoplasms = tables[[3]][-11,]$False_negative, Cardiovascular = tables[[4]]$False_negative,
-                            CDDP = tables[[5]]$False_negative, Colorectal = tables[[6]][-11,]$False_negative, Crohn = tables[[7]][-11,]$False_negative, Lung_neoplasms = tables[[8]]$False_negative, Obesity = tables[[9]]$False_negative,
-                            Psoriasis = tables[[10]][-11,]$False_negative, Type2_diabetes = tables[[11]]$False_negative)
+                        CDDP = tables[[5]]$False_negative, Colorectal = tables[[6]][-11,]$False_negative, Crohn = tables[[7]][-11,]$False_negative, Lung_neoplasms = tables[[8]]$False_negative, Obesity = tables[[9]]$False_negative,
+                        Psoriasis = tables[[10]][-11,]$False_negative, Type2_diabetes = tables[[11]]$False_negative)
+
 
 tables_FP <- melt(tables_FP)
 tables_FN <- melt(tables_FN)
+
+
+### sort according to the value ###
+### have the darker column listed first ###
 
 sum_FP <- rep(NA,19)
 for(i in 1:length(name)){
@@ -190,7 +193,7 @@ rank <- a[order(a$sum_FP),]
 
 rank2 <- data.frame()
 for(i in 1:18){
-  rank2 <- rbind(rank2, tables_FP[which(tables_FP$motif == unfactor(rank$name[i])),])
+  rank2 <- rbind(rank2, tables_FP[which(tables_FP$motif == rank$name[i]),])
 }
 rank2 <- rank2[nrow(rank2):1,]
 
@@ -200,7 +203,28 @@ for(i in 1:18){
 }
 b <- factor(b,levels = c(1:18), labels = unique(rank2$motif))
 rank2$b <- b
+colnames(rank2) <- c("motif", "Diseases", "Value", "TFs")
 
+rank2 <- rank2[rev(order(rank2$Diseases)),]
+
+rank2$Diseases <- as.character(rank2$Diseases)
+
+rank2$Diseases <- c(rep("Type 2 Diabetes", 18),
+                    rep("Psoriasis",18),
+                    rep("Obesity",18),
+                    rep("Lung Cancer", 18),
+                    rep("Crohn's Disease", 18),
+                    rep("Colorectal Cancer", 18),
+                    rep("CDDP", 18),
+                    rep("Cardiovascular Diseases", 18),
+                    rep("Breast Cancer", 18),
+                    rep("Asthma", 18),
+                    rep("AD", 18))
+
+
+
+rank2$Diseases <- factor(rank2$Diseases , levels = c("Type 2 Diabetes","Psoriasis","Obesity","Lung Cancer","Crohn's Disease","Colorectal Cancer",
+                                                     "CDDP","Cardiovascular Diseases","Breast Cancer","Asthma","AD"))
 
 
 library(ggplot2)
@@ -208,9 +232,18 @@ library(reshape)
 library(lattice)
 library(gridExtra)
 library(grid)
-heatmap_FP <- ggplot(rank2, aes(x = b, y = variable)) + geom_tile(aes(fill = value)) + scale_fill_gradient(low = "white", high = "steelblue")
-heatmap_FP <- heatmap_FP + labs(title = "a")
-heatmap_FN <- ggplot(tables_FN, aes(x = motif, y = variable)) + geom_tile(aes(fill = value))
+heatmap_FP <- ggplot(rank2, aes(x = TFs, y = Diseases)) + geom_tile(aes(fill = Value)) + scale_fill_gradient(low = "white", high = "steelblue")
+
+
+heatmap_FP <- heatmap_FP  + 
+  theme(axis.text.x=element_text(angle = 30, size = 12, vjust = 1, hjust = 1, face = "bold", color = "black")) + 
+  theme(axis.text.y=element_text(size = 12, vjust = 0, hjust = 1, face = "bold", color = "black")) +
+  theme(axis.title.x = element_text(size = 14, face = "bold", color = "black")) +
+  theme(axis.title.y = element_text(size = 14, face = "bold", color = "black")) +
+  theme(legend.title = element_text(color = "black", size = 12, face = "bold"), legend.text = element_text(color = "black", size = 12, face = "bold"))
+
+
+heatmap_FN <- ggplot(tables_FN, aes(x = motif, y = Disease)) + geom_tile(aes(fill = value))
 heatmap_FN <- heatmap_FN + labs(title = "b")
 
 panels <- list()
@@ -221,13 +254,7 @@ pdf(file = "/Users/jiangjiahui/Desktop/emory/Thesis/JJH part/heatmap_FP_FN.pdf",
 grid.arrange(panels[[1]], panels[[2]], nrow = 2)
 dev.off()
 
-pdf(file = "/Users/jiangjiahui/Desktop/emory/Thesis/JJH part/heatmap_FP2.pdf", width = 12)
+pdf(file = "/Users/jiangjiahui/Desktop/emory/Thesis/JJH part/heatmap_FP3.pdf", width = 12)
 grid.arrange(panels[[1]],nrow = 1)
 dev.off()
-
-
-
-
-
-
 
