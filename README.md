@@ -13,7 +13,7 @@ All the other dependent packages are listed at the beginning of each code file.
 
 (1) "bed_file": all peak files used as positive sets for training gkmSVM 
 
-(2) "PWM": position weight matrix for target TFs
+(2) "PWM": Source position frequency matrix for target TFs. Most files are from JASPAR, Factorbook and Xu, et al.(2015). All PFMs are transfered to position probability matrix ahead of analysis, thus there are 18 files ended with ".ppm" for use in this folder.
 
 (3) "SNPs_db153Common": All SNPs found on 23 human chromosomes (from UCSC Genome Browser)
 
@@ -37,4 +37,4 @@ Part 9: Exploring potential association between TFs and complex diseases
 
 Part 10: Supplementary materials (Figures & Tables)
 
-
+Part 11: Additional performance comparison study for gkmSVM and traditional PWM approach.
